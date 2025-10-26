@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Lost & Found Kenya</title>
+    <meta name="description" content="Manage your lost and found items, view transactions, and update your profile on Kenya's trusted platform.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <style>
+        :root {
+            --kenya-black: #000000;
+            --kenya-red: #B22234;
+            --kenya-green: #006B3C;
+            --safaricom-green: #00A651;
+            --warm-orange: #FF6B35;
+            --deep-blue: #1E3A8A;
+            --savanna-gold: #F4A460;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #006B3C 0%, #00A651 50%, #F4A460 100%);
+            background-attachment: fixed;
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, var(--kenya-red), var(--warm-orange), var(--savanna-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .swahili-text {
+            font-family: 'Dancing Script', cursive;
+            color: var(--safaricom-green);
+        }
+        
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active {
+            background-color: var(--safaricom-green);
+            color: white;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(0, 166, 81, 0.1);
+        }
+        
+        .nav-item.active:hover {
+            background-color: var(--kenya-green);
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-resolved {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-expired {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .chart-container {
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-morphism">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-xl font-bold text-white">
+                        <span class="gradient-text">Lost&amp;Found</span>
+                        <span class="swahili-text ml-2">Kenya</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-white hover:text-yellow-300 transition-colors">Home</a>
+                    <a href="post-item.html" class="text-white hover:text-yellow-300 transition-colors">Post Item</a>
+                    <a href="search-results.html" class="text-white hover:text-yellow-300 transition-colors">Search</a>
+                    <a href="dashboard.html" class="text-yellow-300 font-semibold">Dashboard</a>
+                    <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-24 pb-12 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-4 gap-8">
+                <!-- Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="sidebar-nav rounded-2xl p-6 sticky top-24">
+                        <!-- User Profile -->
+                        <div class="text-center mb-8">
+                            <img src="resources/kenyan-people-diverse.jpg" alt="Profile" class="w-20 h-20 rounded-full mx-auto mb-4 object-cover">
+                            <h3 class="text-lg font-semibold text-gray-900" id="userName">Loading...</h3>
+                            <p class="text-sm text-gray-600" id="userEmail">Loading...</p>
+                        </div>
+                        
+                        <!-- Navigation -->
+                        <nav class="space-y-2">
+                            <a href="#overview" class="nav-item active flex items-center px-4 py-3 rounded-lg text-sm font-medium">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                                </svg>
+                                Overview
+                            </a>
+                            <a href="#my-items" class="nav-item flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                </svg>
+                                My Items
+                            </a>
+                            <a href="#transactions" class="nav-item flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Transactions
+                            </a>
+                            <a href="#profile" class="nav-item flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                Profile
+                            </a>
+                            <a href="#settings" class="nav-item flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Settings
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="lg:col-span-3">
+                    <!-- Overview Section -->
+                    <div id="overview-section" class="dashboard-section">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">Dashboard Overview</h2>
+                            <p class="text-gray-200">Welcome back! Here's what's happening with your items.</p>
+                        </div>
+
+                        <!-- Stats Cards -->
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="dashboard-card rounded-2xl p-6">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900" id="totalItems">0</h3>
+                                        <p class="text-gray-600">Total Items</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dashboard-card rounded-2xl p-6">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900" id="resolvedItems">0</h3>
+                                        <p class="text-gray-600">Resolved</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dashboard-card rounded-2xl p-6">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900" id="totalSpent">Ksh. 0</h3>
+                                        <p class="text-gray-600">Total Spent</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dashboard-card rounded-2xl p-6">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900" id="successRate">0%</h3>
+                                        <p class="text-gray-600">Success Rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts -->
+                        <div class="grid md:grid-cols-2 gap-6 mb-8">
+                            <div class="dashboard-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Item Activity</h3>
+                                <div id="activityChart" class="chart-container"></div>
+                            </div>
+                            <div class="dashboard-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Category Distribution</h3>
+                                <div id="categoryChart" class="chart-container"></div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="dashboard-card rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                                <button class="text-safaricom-green font-semibold hover:text-green-600 transition-colors">
+                                    View All
+                                </button>
+                            </div>
+                            <div class="space-y-4" id="recentActivity">
+                                <!-- Activity items will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- My Items Section -->
+                    <div id="my-items-section" class="dashboard-section hidden">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">My Items</h2>
+                            <p class="text-gray-200">Manage your posted lost and found items.</p>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                                <div class="flex space-x-4 mb-4 md:mb-0">
+                                    <button class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-filter="all">
+                                        All Items
+                                    </button>
+                                    <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-filter="active">
+                                        Active
+                                    </button>
+                                    <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-filter="resolved">
+                                        Resolved
+                                    </button>
+                                </div>
+                                <button onclick="window.location.href='post-item.html'" class="bg-safaricom-green text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                                    + Post New Item
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6" id="myItemsGrid">
+                            <!-- Items will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Transactions Section -->
+                    <div id="transactions-section" class="dashboard-section hidden">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">Transactions</h2>
+                            <p class="text-gray-200">View your payment history and M-Pesa transactions.</p>
+                        </div>
+
+                        <div class="dashboard-card rounded-2xl p-6">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Description</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Amount</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transactionsTable">
+                                        <!-- Transactions will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Section -->
+                    <div id="profile-section" class="dashboard-section hidden">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">Profile Settings</h2>
+                            <p class="text-gray-200">Update your personal information and preferences.</p>
+                        </div>
+
+                        <div class="dashboard-card rounded-2xl p-6">
+                            <form id="profileForm" class="space-y-6">
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Full Name</label>
+                                        <input type="text" id="profileName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
+                                        <input type="email" id="profileEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
+                                        <input type="tel" id="profilePhone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Location</label>
+                                        <select id="profileLocation" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required>
+                                            <option value="">Select location</option>
+                                            <option value="Nairobi">Nairobi</option>
+                                            <option value="Mombasa">Mombasa</option>
+                                            <option value="Kisumu">Kisumu</option>
+                                            <option value="Eldoret">Eldoret</option>
+                                            <option value="Nakuru">Nakuru</option>
+                                            <option value="Meru">Meru</option>
+                                            <option value="Nyeri">Nyeri</option>
+                                            <option value="Machakos">Machakos</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Bio</label>
+                                    <textarea id="profileBio" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" placeholder="Tell us a bit about yourself..."></textarea>
+                                </div>
+                                
+                                <div class="flex justify-end">
+                                    <button type="submit" class="bg-safaricom-green text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
+                                        Update Profile
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section -->
+                    <div id="settings-section" class="dashboard-section hidden">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">Account Settings</h2>
+                            <p class="text-gray-200">Manage your account preferences and security settings.</p>
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- Notifications -->
+                            <div class="dashboard-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Notifications</h3>
+                                <div class="space-y-4">
+                                    <label class="flex items-center justify-between">
+                                        <span class="text-gray-700">Email notifications for matches</span>
+                                        <input type="checkbox" class="toggle-switch" checked>
+                                    </label>
+                                    <label class="flex items-center justify-between">
+                                        <span class="text-gray-700">SMS notifications for urgent items</span>
+                                        <input type="checkbox" class="toggle-switch" checked>
+                                    </label>
+                                    <label class="flex items-center justify-between">
+                                        <span class="text-gray-700">Weekly digest email</span>
+                                        <input type="checkbox" class="toggle-switch">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Privacy -->
+                            <div class="dashboard-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Privacy</h3>
+                                <div class="space-y-4">
+                                    <label class="flex items-center justify-between">
+                                        <span class="text-gray-700">Show my profile to other users</span>
+                                        <input type="checkbox" class="toggle-switch" checked>
+                                    </label>
+                                    <label class="flex items-center justify-between">
+                                        <span class="text-gray-700">Allow direct messages</span>
+                                        <input type="checkbox" class="toggle-switch" checked>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Security -->
+                            <div class="dashboard-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Security</h3>
+                                <div class="space-y-4">
+                                    <button class="w-full text-left px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        Change Password
+                                    </button>
+                                    <button class="w-full text-left px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        Two-Factor Authentication
+                                    </button>
+                                    <button class="w-full text-left px-4 py-3 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors">
+                                        Delete Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        // Dashboard Logic
+        let currentSection = 'overview';
+        let userItems = [];
+        let userTransactions = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+        });
+
+        function initializeDashboard() {
+            // Check if user is logged in
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const user = JSON.parse(currentUser);
+            loadUserProfile(user);
+            loadDashboardData();
+            setupNavigation();
+            setupFilters();
+        }
+
+        function loadUserProfile(user) {
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userEmail').textContent = user.email;
+            
+            // Populate profile form
+            document.getElementById('profileName').value = user.name;
+            document.getElementById('profileEmail').value = user.email;
+            document.getElementById('profilePhone').value = user.phone || '+2547XXXXXXXX';
+            document.getElementById('profileLocation').value = user.location || 'Nairobi';
+            document.getElementById('profileBio').value = user.bio || '';
+        }
+
+        function loadDashboardData() {
+            // Load user's items
+            if (window.LostFoundApp && window.LostFoundApp.mockData) {
+                userItems = window.LostFoundApp.mockData.items.filter(item => 
+                    Math.random() > 0.5 // Simulate user ownership
+                );
+                userTransactions = window.LostFoundApp.mockData.transactions.filter(transaction =>
+                    Math.random() > 0.5 // Simulate user transactions
+                );
+            } else {
+                // Generate mock data for demo
+                userItems = generateMockUserItems();
+                userTransactions = generateMockTransactions();
+            }
+
+            updateStats();
+            loadRecentActivity();
+            loadMyItems();
+            loadTransactions();
+            initializeCharts();
+        }
+
+        function generateMockUserItems() {
+            return [
+                {
+                    id: 1,
+                    type: 'lost',
+                    title: 'iPhone 14 Pro - Blue',
+                    description: 'Lost iPhone 14 Pro blue color near Sarit Centre',
+                    location: 'Westlands, Nairobi',
+                    date: '2024-10-20',
+                    status: 'active',
+                    category: 'phones'
+                },
+                {
+                    id: 2,
+                    type: 'found',
+                    title: 'National ID Card - John Doe',
+                    description: 'Found National ID card near CBD bus station',
+                    location: 'Nairobi CBD',
+                    date: '2024-10-18',
+                    status: 'resolved',
+                    category: 'ids'
+                },
+                {
+                    id: 3,
+                    type: 'lost',
+                    title: 'Black Leather Wallet',
+                    description: 'Black leather wallet with cards and cash',
+                    location: 'Kenyatta University',
+                    date: '2024-10-15',
+                    status: 'active',
+                    category: 'wallets'
+                }
+            ];
+        }
+
+        function generateMockTransactions() {
+            return [
+                {
+                    id: 1,
+                    date: '2024-10-20',
+                    description: 'Unlock contact for iPhone 14 Pro',
+                    amount: 20,
+                    status: 'completed'
+                },
+                {
+                    id: 2,
+                    date: '2024-10-18',
+                    description: 'Unlock contact for National ID',
+                    amount: 20,
+                    status: 'completed'
+                },
+                {
+                    id: 3,
+                    date: '2024-10-15',
+                    description: 'Unlock contact for Wallet',
+                    amount: 20,
+                    status: 'completed'
+                }
+            ];
+        }
+
+        function updateStats() {
+            const totalItems = userItems.length;
+            const resolvedItems = userItems.filter(item => item.status === 'resolved').length;
+            const totalSpent = userTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+            const successRate = totalItems > 0 ? Math.round((resolvedItems / totalItems) * 100) : 0;
+
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('resolvedItems').textContent = resolvedItems;
+            document.getElementById('totalSpent').textContent = `Ksh. ${totalSpent}`;
+            document.getElementById('successRate').textContent = `${successRate}%`;
+        }
+
+        function loadRecentActivity() {
+            const activity = [
+                {
+                    type: 'item_posted',
+                    message: 'You posted a lost iPhone 14 Pro',
+                    time: '2 hours ago',
+                    icon: '📱'
+                },
+                {
+                    type: 'match_found',
+                    message: 'Potential match found for your wallet',
+                    time: '1 day ago',
+                    icon: '🔍'
+                },
+                {
+                    type: 'payment_made',
+                    message: 'Paid Ksh. 20 to unlock contact details',
+                    time: '2 days ago',
+                    icon: '💳'
+                },
+                {
+                    type: 'item_resolved',
+                    message: 'Your National ID was successfully returned',
+                    time: '3 days ago',
+                    icon: '✅'
+                }
+            ];
+
+            const activityContainer = document.getElementById('recentActivity');
+            activityContainer.innerHTML = activity.map(item => `
+                <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-2xl mr-4">${item.icon}</div>
+                    <div class="flex-1">
+                        <p class="text-gray-900 font-medium">${item.message}</p>
+                        <p class="text-sm text-gray-600">${item.time}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadMyItems() {
+            const itemsGrid = document.getElementById('myItemsGrid');
+            itemsGrid.innerHTML = userItems.map(item => `
+                <div class="dashboard-card rounded-2xl p-6 item-card" data-status="${item.status}">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="status-badge status-${item.status}">${item.status.toUpperCase()}</span>
+                        <div class="flex space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                            <button class="text-red-600 hover:text-red-800">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">${item.title}</h3>
+                    <p class="text-gray-600 text-sm mb-3">${item.description}</p>
+                    <div class="flex items-center text-gray-500 text-sm mb-3">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        ${item.location}
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">${formatDate(item.date)}</span>
+                        <span class="text-sm font-medium text-gray-700">${item.type.toUpperCase()}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadTransactions() {
+            const transactionsTable = document.getElementById('transactionsTable');
+            transactionsTable.innerHTML = userTransactions.map(transaction => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-3 px-4">${formatDate(transaction.date)}</td>
+                    <td class="py-3 px-4">${transaction.description}</td>
+                    <td class="py-3 px-4 font-semibold">Ksh. ${transaction.amount}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${transaction.status.toUpperCase()}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function initializeCharts() {
+            // Activity Chart
+            const activityChart = echarts.init(document.getElementById('activityChart'));
+            const activityOption = {
+                tooltip: { trigger: 'axis' },
+                xAxis: {
+                    type: 'category',
+                    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                },
+                yAxis: { type: 'value' },
+                series: [{
+                    data: [2, 3, 1, 4, 2, 3, 1],
+                    type: 'line',
+                    smooth: true,
+                    itemStyle: { color: '#00A651' },
+                    areaStyle: { color: 'rgba(0, 166, 81, 0.1)' }
+                }]
+            };
+            activityChart.setOption(activityOption);
+
+            // Category Chart
+            const categoryChart = echarts.init(document.getElementById('categoryChart'));
+            const categoryOption = {
+                tooltip: { trigger: 'item' },
+                series: [{
+                    type: 'pie',
+                    radius: '70%',
+                    data: [
+                        { value: 35, name: 'Phones', itemStyle: { color: '#00A651' } },
+                        { value: 25, name: 'IDs', itemStyle: { color: '#006B3C' } },
+                        { value: 20, name: 'Wallets', itemStyle: { color: '#FF6B35' } },
+                        { value: 20, name: 'Other', itemStyle: { color: '#1E3A8A' } }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }]
+            };
+            categoryChart.setOption(categoryOption);
+        }
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('href').substring(1);
+                    switchSection(target);
+                });
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            });
+        }
+
+        function setupFilters() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const filter = this.dataset.filter;
+                    filterItems(filter);
+                });
+            });
+
+            document.getElementById('profileForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                LostFoundApp.showNotification('Profile updated successfully!', 'success');
+            });
+        }
+
+        function switchSection(section) {
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[href="#${section}"]`).classList.add('active');
+
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+
+            // Show target section
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            currentSection = section;
+        }
+
+        function filterItems(filter) {
+            const items = document.querySelectorAll('.item-card');
+            items.forEach(item => {
+                const status = item.dataset.status;
+                if (filter === 'all' || status === filter) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-KE', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Initialize toggle switches
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('toggle-switch')) {
+                LostFoundApp.showNotification('Settings updated', 'success');
+            }
+        });
+    </script>
+</body>
+</html>

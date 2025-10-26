@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Item - Lost & Found Kenya</title>
+    <meta name="description" content="Post lost or found items on Kenya's trusted lost and found platform. Free to post, secure connections.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <style>
+        :root {
+            --kenya-black: #000000;
+            --kenya-red: #B22234;
+            --kenya-green: #006B3C;
+            --safaricom-green: #00A651;
+            --warm-orange: #FF6B35;
+            --deep-blue: #1E3A8A;
+            --savanna-gold: #F4A460;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #006B3C 0%, #00A651 50%, #F4A460 100%);
+            background-attachment: fixed;
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, var(--kenya-red), var(--warm-orange), var(--savanna-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .swahili-text {
+            font-family: 'Dancing Script', cursive;
+            color: var(--safaricom-green);
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+            animation: slideIn 0.3s ease-in-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .step-indicator {
+            transition: all 0.3s ease;
+        }
+        
+        .step-indicator.active {
+            background-color: var(--safaricom-green);
+            color: white;
+        }
+        
+        .step-indicator.completed {
+            background-color: var(--kenya-green);
+            color: white;
+        }
+        
+        .image-upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        
+        .image-upload-area:hover {
+            border-color: var(--safaricom-green);
+            background-color: rgba(0, 166, 81, 0.05);
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-morphism">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-xl font-bold text-white">
+                        <span class="gradient-text">Lost&amp;Found</span>
+                        <span class="swahili-text ml-2">Kenya</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-white hover:text-yellow-300 transition-colors">Home</a>
+                    <a href="post-item.html" class="text-yellow-300 font-semibold">Post Item</a>
+                    <a href="search-results.html" class="text-white hover:text-yellow-300 transition-colors">Search</a>
+                    <a href="dashboard.html" class="text-white hover:text-yellow-300 transition-colors">Dashboard</a>
+                    <button id="loginBtn" class="bg-safaricom-green text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">Login</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-24 pb-12 min-h-screen">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">
+                    Post Your Item
+                </h1>
+                <p class="text-xl text-gray-200 leading-relaxed">
+                    Help reunite someone with their belongings or find what you've lost
+                </p>
+                <p class="swahili-text text-2xl mt-4">
+                    "Tuko pamoja" (We are together)
+                </p>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="flex justify-center mb-8">
+                <div class="flex items-center space-x-4">
+                    <div class="step-indicator active w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-semibold" data-step="1">1</div>
+                    <div class="w-16 h-1 bg-gray-300"></div>
+                    <div class="step-indicator w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-semibold" data-step="2">2</div>
+                    <div class="w-16 h-1 bg-gray-300"></div>
+                    <div class="step-indicator w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-semibold" data-step="3">3</div>
+                    <div class="w-16 h-1 bg-gray-300"></div>
+                    <div class="step-indicator w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-semibold" data-step="4">4</div>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+                <form id="postItemForm" class="p-8 lg:p-12">
+                    <!-- Step 1: Item Type -->
+                    <div class="form-step active" id="step1">
+                        <div class="text-center mb-8">
+                            <h2 class="text-3xl font-bold text-gray-900 mb-4">What are you posting?</h2>
+                            <p class="text-gray-600">Select whether you found something or lost something</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="item-type-card p-6 border-2 border-gray-200 rounded-2xl cursor-pointer hover:border-safaricom-green transition-all" data-type="found">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">I Found Something</h3>
+                                    <p class="text-gray-600">Post an item you found to help reunite it with its owner</p>
+                                    <span class="inline-block mt-4 px-4 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-semibold">FREE to post</span>
+                                </div>
+                            </div>
+                            
+                            <div class="item-type-card p-6 border-2 border-gray-200 rounded-2xl cursor-pointer hover:border-safaricom-green transition-all" data-type="lost">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">I Lost Something</h3>
+                                    <p class="text-gray-600">Post about something you lost to find potential matches</p>
+                                    <span class="inline-block mt-4 px-4 py-2 bg-orange-100 text-orange-800 rounded-lg text-sm font-semibold">FREE to post</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" id="itemType" name="itemType" required>
+                    </div>
+
+                    <!-- Step 2: Item Details -->
+                    <div class="form-step" id="step2">
+                        <div class="text-center mb-8">
+                            <h2 class="text-3xl font-bold text-gray-900 mb-4">Item Details</h2>
+                            <p class="text-gray-600">Provide as much information as possible</p>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Item Category *</label>
+                                    <select id="itemCategory" name="itemCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required>
+                                        <option value="">Select category</option>
+                                        <option value="ids">ID Cards & Documents</option>
+                                        <option value="phones">Mobile Phones</option>
+                                        <option value="wallets">Wallets & Purses</option>
+                                        <option value="keys">Keys & Keyrings</option>
+                                        <option value="bags">Bags & Backpacks</option>
+                                        <option value="jewelry">Jewelry & Watches</option>
+                                        <option value="electronics">Electronics</option>
+                                        <option value="other">Other Items</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Item Title *</label>
+                                    <input type="text" id="itemTitle" name="itemTitle" placeholder="e.g., Black Wallet, iPhone 14 Pro" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Detailed Description *</label>
+                                <textarea id="itemDescription" name="itemDescription" rows="4" placeholder="Describe the item in detail: color, brand, size, any unique identifiers, name visible on ID if applicable..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required></textarea>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Location Found/Lost *</label>
+                                    <input type="text" id="itemLocation" name="itemLocation" placeholder="e.g., Nairobi CBD, Kenyatta University" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Date Found/Lost *</label>
+                                    <input type="date" id="itemDate" name="itemDate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Photos -->
+                    <div class="form-step" id="step3">
+                        <div class="text-center mb-8">
+                            <h2 class="text-3xl font-bold text-gray-900 mb-4">Add Photos</h2>
+                            <p class="text-gray-600">Photos help identify items more easily</p>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="image-upload-area p-8 rounded-2xl text-center cursor-pointer" id="imageUploadArea">
+                                <input type="file" id="itemImage" name="itemImage" accept="image/*" class="hidden">
+                                <div id="uploadContent">
+                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Upload Photo</h3>
+                                    <p class="text-gray-500 mb-4">Click to select an image or drag and drop</p>
+                                    <button type="button" class="bg-safaricom-green text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                                        Choose File
+                                    </button>
+                                </div>
+                                <div id="imagePreview" class="hidden">
+                                    <img id="previewImage" class="image-preview mx-auto mb-4" alt="Preview">
+                                    <button type="button" id="changeImage" class="text-safaricom-green font-semibold hover:text-green-600 transition-colors">
+                                        Change Photo
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-yellow-800 mb-1">Privacy Notice</h4>
+                                        <p class="text-sm text-yellow-700">
+                                            For ID cards and sensitive documents, we'll automatically blur personal information like ID numbers for privacy protection.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Contact Information -->
+                    <div class="form-step" id="step4">
+                        <div class="text-center mb-8">
+                            <h2 class="text-3xl font-bold text-gray-900 mb-4">Contact Information</h2>
+                            <p class="text-gray-600">How can the owner/finder reach you?</p>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Your Name *</label>
+                                    <input type="text" id="contactName" name="contactName" placeholder="Your full name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number *</label>
+                                    <input type="tel" id="contactPhone" name="contactPhone" placeholder="+2547XXXXXXXX" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green" required>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
+                                <input type="email" id="contactEmail" name="contactEmail" placeholder="your.email@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Additional Instructions</label>
+                                <textarea id="instructions" name="instructions" rows="3" placeholder="Any special instructions for meeting, identification process, etc." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green"></textarea>
+                            </div>
+                            
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-blue-800 mb-1">Privacy Protection</h4>
+                                        <p class="text-sm text-blue-700">
+                                            Your contact information will be hidden until someone pays the Ksh. 20 unlock fee. This helps prevent spam and ensures serious inquiries only.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between mt-12">
+                        <button type="button" id="prevBtn" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors hidden">
+                            ← Previous
+                        </button>
+                        <div class="flex-1"></div>
+                        <button type="button" id="nextBtn" class="px-8 py-3 bg-safaricom-green text-white rounded-lg hover:bg-green-600 transition-colors">
+                            Next →
+                        </button>
+                        <button type="submit" id="submitBtn" class="px-8 py-3 bg-safaricom-green text-white rounded-lg hover:bg-green-600 transition-colors hidden">
+                            Post Item
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Item Posted Successfully!</h3>
+            <p class="text-gray-600 mb-6" id="successMessage">
+                Your item has been posted and will be visible to others searching for it.
+            </p>
+            <div class="space-y-3">
+                <button onclick="window.location.href='index.html'" class="w-full bg-safaricom-green text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
+                    Back to Home
+                </button>
+                <button onclick="window.location.href='search-results.html'" class="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                    Browse Items
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        // Post Item Form Logic
+        let currentStep = 1;
+        const totalSteps = 4;
+        let formData = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePostItemForm();
+        });
+
+        function initializePostItemForm() {
+            // Item type selection
+            document.querySelectorAll('.item-type-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.item-type-card').forEach(c => c.classList.remove('border-safaricom-green', 'bg-green-50'));
+                    this.classList.add('border-safaricom-green', 'bg-green-50');
+                    document.getElementById('itemType').value = this.dataset.type;
+                });
+            });
+
+            // Image upload
+            setupImageUpload();
+
+            // Form navigation
+            setupFormNavigation();
+
+            // Form submission
+            document.getElementById('postItemForm').addEventListener('submit', handleFormSubmission);
+
+            // Set today's date as default
+            document.getElementById('itemDate').valueAsDate = new Date();
+        }
+
+        function setupImageUpload() {
+            const uploadArea = document.getElementById('imageUploadArea');
+            const fileInput = document.getElementById('itemImage');
+            const uploadContent = document.getElementById('uploadContent');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
+            const changeImage = document.getElementById('changeImage');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        uploadContent.classList.add('hidden');
+                        imagePreview.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            changeImage.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('border-safaricom-green', 'bg-green-50');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('border-safaricom-green', 'bg-green-50');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('border-safaricom-green', 'bg-green-50');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    const event = new Event('change');
+                    fileInput.dispatchEvent(event);
+                }
+            });
+        }
+
+        function setupFormNavigation() {
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            nextBtn.addEventListener('click', nextStep);
+            prevBtn.addEventListener('click', prevStep);
+
+            function nextStep() {
+                if (validateCurrentStep()) {
+                    if (currentStep < totalSteps) {
+                        currentStep++;
+                        updateStepDisplay();
+                    }
+                }
+            }
+
+            function prevStep() {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateStepDisplay();
+                }
+            }
+
+            function updateStepDisplay() {
+                // Hide all steps
+                document.querySelectorAll('.form-step').forEach(step => {
+                    step.classList.remove('active');
+                });
+
+                // Show current step
+                document.getElementById(`step${currentStep}`).classList.add('active');
+
+                // Update step indicators
+                document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+                    const stepNum = index + 1;
+                    indicator.classList.remove('active', 'completed');
+                    
+                    if (stepNum < currentStep) {
+                        indicator.classList.add('completed');
+                    } else if (stepNum === currentStep) {
+                        indicator.classList.add('active');
+                    }
+                });
+
+                // Update navigation buttons
+                prevBtn.classList.toggle('hidden', currentStep === 1);
+                nextBtn.classList.toggle('hidden', currentStep === totalSteps);
+                submitBtn.classList.toggle('hidden', currentStep !== totalSteps);
+            }
+        }
+
+        function validateCurrentStep() {
+            switch (currentStep) {
+                case 1:
+                    return document.getElementById('itemType').value !== '';
+                case 2:
+                    return document.getElementById('itemCategory').value !== '' &&
+                           document.getElementById('itemTitle').value !== '' &&
+                           document.getElementById('itemDescription').value !== '' &&
+                           document.getElementById('itemLocation').value !== '' &&
+                           document.getElementById('itemDate').value !== '';
+                case 3:
+                    // Photo is optional
+                    return true;
+                case 4:
+                    return document.getElementById('contactName').value !== '' &&
+                           document.getElementById('contactPhone').value !== '';
+                default:
+                    return true;
+            }
+        }
+
+        function handleFormSubmission(e) {
+            e.preventDefault();
+            
+            if (!validateCurrentStep()) {
+                LostFoundApp.showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Collect form data
+            const formData = new FormData(e.target);
+            const itemData = Object.fromEntries(formData.entries());
+            
+            // Add item type
+            itemData.type = document.getElementById('itemType').value;
+            
+            // Simulate saving to database
+            setTimeout(() => {
+                // Add to mock data
+                const newItem = {
+                    id: Date.now(),
+                    ...itemData,
+                    status: 'active',
+                    date: new Date().toISOString().split('T')[0]
+                };
+                
+                if (window.LostFoundApp && window.LostFoundApp.mockData) {
+                    window.LostFoundApp.mockData.items.unshift(newItem);
+                }
+                
+                // Show success modal
+                showSuccessModal(itemData.type);
+            }, 1000);
+        }
+
+        function showSuccessModal(itemType) {
+            const modal = document.getElementById('successModal');
+            const message = document.getElementById('successMessage');
+            
+            if (itemType === 'found') {
+                message.textContent = 'Your found item has been posted! The owner can now search for it and contact you through our secure system.';
+            } else {
+                message.textContent = 'Your lost item has been posted! We\'ll notify you when potential matches are found.';
+            }
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Initialize form when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePostItemForm);
+        } else {
+            initializePostItemForm();
+        }
+    </script>
+</body>
+</html>

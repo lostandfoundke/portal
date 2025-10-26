@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Lost & Found Kenya</title>
+    <meta name="description" content="Admin dashboard for managing Lost & Found Kenya platform. Monitor posts, users, payments, and platform analytics.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <style>
+        :root {
+            --kenya-black: #000000;
+            --kenya-red: #B22234;
+            --kenya-green: #006B3C;
+            --safaricom-green: #00A651;
+            --warm-orange: #FF6B35;
+            --deep-blue: #1E3A8A;
+            --savanna-gold: #F4A460;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #006B3C 0%, #00A651 50%, #F4A460 100%);
+            background-attachment: fixed;
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, var(--kenya-red), var(--warm-orange), var(--savanna-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .swahili-text {
+            font-family: 'Dancing Script', cursive;
+            color: var(--safaricom-green);
+        }
+        
+        .admin-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .admin-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active {
+            background-color: var(--safaricom-green);
+            color: white;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(0, 166, 81, 0.1);
+        }
+        
+        .nav-item.active:hover {
+            background-color: var(--kenya-green);
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-approved {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-flagged {
+            background-color: #f3e8ff;
+            color: #6b21a8;
+        }
+        
+        .chart-container {
+            height: 300px;
+        }
+        
+        .data-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-morphism">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-xl font-bold text-white">
+                        <span class="gradient-text">Lost&amp;Found</span>
+                        <span class="swahili-text ml-2">Kenya</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-white hover:text-yellow-300 transition-colors">Home</a>
+                    <a href="post-item.html" class="text-white hover:text-yellow-300 transition-colors">Post Item</a>
+                    <a href="search-results.html" class="text-white hover:text-yellow-300 transition-colors">Search</a>
+                    <a href="dashboard.html" class="text-white hover:text-yellow-300 transition-colors">Dashboard</a>
+                    <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-24 pb-12 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Admin Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">
+                    Admin Dashboard
+                </h1>
+                <p class="text-xl text-gray-200 leading-relaxed">
+                    Platform Management & Analytics
+                </p>
+                <div class="mt-4">
+                    <span class="inline-block bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                        🔒 Admin Access Only
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-4 gap-8">
+                <!-- Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="sidebar-nav rounded-2xl p-6 sticky top-24">
+                        <!-- Admin Profile -->
+                        <div class="text-center mb-8">
+                            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900">Admin User</h3>
+                            <p class="text-sm text-gray-600">moneymaker9767@gmail.com</p>
+                            <p class="text-xs text-red-600 font-semibold mt-2">ADMINISTRATOR</p>
+                        </div>
+                        
+                        <!-- Navigation -->
+                        <nav class="space-y-2">
+                            <a href="#overview" class="nav-item active flex items-center px-4 py-3 rounded-lg text-sm font-medium">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                Overview
+                            </a>
+                            <a href="#posts" class="nav-item flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                </svg>
+                                Manage Posts
+                            </a>
+                            <a href="#users" class="nav-item flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                </svg>
+                                Users
+                            </a>
+                            <a href="#payments" class="nav-item flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Payments
+                            </a>
+                            <a href="#analytics" class="nav-item flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                Analytics
+                            </a>
+                            <a href="#settings" class="nav-item flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Settings
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="lg:col-span-3">
+                    <!-- Overview Section -->
+                    <div id="overview-section" class="admin-section">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">Platform Overview</h2>
+                            <p class="text-gray-200">Real-time insights and platform statistics.</p>
+                        </div>
+
+                        <!-- Stats Cards -->
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="admin-card rounded-2xl p-6">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900" id="totalPosts">647</h3>
+                                        <p class="text-gray-600">Total Posts</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="admin-card rounded-2xl p-6">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900" id="totalUsers">1,234</h3>
+                                        <p class="text-gray-600">Total Users</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="admin-card rounded-2xl p-6">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900" id="totalRevenue">Ksh. 12,840</h3>
+                                        <p class="text-gray-600">Total Revenue</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="admin-card rounded-2xl p-6">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-2xl font-bold text-gray-900" id="successRate">87%</h3>
+                                        <p class="text-gray-600">Success Rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts -->
+                        <div class="grid md:grid-cols-2 gap-6 mb-8">
+                            <div class="admin-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Platform Activity</h3>
+                                <div id="activityChart" class="chart-container"></div>
+                            </div>
+                            <div class="admin-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue by Category</h3>
+                                <div id="revenueChart" class="chart-container"></div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="admin-card rounded-2xl p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <button onclick="switchSection('posts')" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-safaricom-green hover:bg-green-50 transition-colors">
+                                    <svg class="w-8 h-8 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                    </svg>
+                                    <span class="text-gray-600 font-medium">Moderate Posts</span>
+                                </button>
+                                <button onclick="switchSection('users')" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-safaricom-green hover:bg-green-50 transition-colors">
+                                    <svg class="w-8 h-8 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                    </svg>
+                                    <span class="text-gray-600 font-medium">Manage Users</span>
+                                </button>
+                                <button onclick="exportReport()" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-safaricom-green hover:bg-green-50 transition-colors">
+                                    <svg class="w-8 h-8 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span class="text-gray-600 font-medium">Export Report</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Posts Management Section -->
+                    <div id="posts-section" class="admin-section hidden">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">Manage Posts</h2>
+                            <p class="text-gray-200">Review and moderate user posts.</p>
+                        </div>
+
+                        <div class="admin-card rounded-2xl p-6">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                                <div class="flex space-x-4 mb-4 md:mb-0">
+                                    <button class="filter-btn active action-btn bg-blue-100 text-blue-800" data-filter="all">All Posts</button>
+                                    <button class="filter-btn action-btn bg-yellow-100 text-yellow-800" data-filter="pending">Pending</button>
+                                    <button class="filter-btn action-btn bg-green-100 text-green-800" data-filter="approved">Approved</button>
+                                    <button class="filter-btn action-btn bg-red-100 text-red-800" data-filter="rejected">Rejected</button>
+                                    <button class="filter-btn action-btn bg-purple-100 text-purple-800" data-filter="flagged">Flagged</button>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="action-btn bg-green-100 text-green-800" onclick="bulkApprove()">Bulk Approve</button>
+                                    <button class="action-btn bg-red-100 text-red-800" onclick="bulkReject()">Bulk Reject</button>
+                                </div>
+                            </div>
+
+                            <div class="data-table">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 sticky top-0">
+                                        <tr>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">
+                                                <input type="checkbox" id="selectAll" class="mr-2">
+                                            </th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Title</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Type</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">User</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="postsTable">
+                                        <!-- Posts will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users Management Section -->
+                    <div id="users-section" class="admin-section hidden">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">User Management</h2>
+                            <p class="text-gray-200">Manage platform users and their permissions.</p>
+                        </div>
+
+                        <div class="admin-card rounded-2xl p-6">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                                <div class="flex space-x-4 mb-4 md:mb-0">
+                                    <input type="text" placeholder="Search users..." class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green">
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="action-btn bg-safaricom-green text-white" onclick="addUser()">Add User</button>
+                                    <button class="action-btn bg-blue-100 text-blue-800" onclick="exportUsers()">Export Users</button>
+                                </div>
+                            </div>
+
+                            <div class="data-table">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 sticky top-0">
+                                        <tr>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Name</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Phone</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Posts</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Join Date</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTable">
+                                        <!-- Users will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payments Section -->
+                    <div id="payments-section" class="admin-section hidden">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">Payment Management</h2>
+                            <p class="text-gray-200">Monitor M-Pesa transactions and revenue.</p>
+                        </div>
+
+                        <div class="admin-card rounded-2xl p-6">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                                <div class="flex space-x-4 mb-4 md:mb-0">
+                                    <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green">
+                                        <option>All Transactions</option>
+                                        <option>Completed</option>
+                                        <option>Pending</option>
+                                        <option>Failed</option>
+                                    </select>
+                                    <input type="date" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green">
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="action-btn bg-green-100 text-green-800" onclick="reconcilePayments()">Reconcile</button>
+                                    <button class="action-btn bg-blue-100 text-blue-800" onclick="exportPayments()">Export</button>
+                                </div>
+                            </div>
+
+                            <div class="data-table">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 sticky top-0">
+                                        <tr>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Transaction ID</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">User</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Amount</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Type</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
+                                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="paymentsTable">
+                                        <!-- Payments will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Section -->
+                    <div id="analytics-section" class="admin-section hidden">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">Platform Analytics</h2>
+                            <p class="text-gray-200">Detailed insights and performance metrics.</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6 mb-8">
+                            <div class="admin-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">User Growth</h3>
+                                <div id="userGrowthChart" class="chart-container"></div>
+                            </div>
+                            <div class="admin-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue Trends</h3>
+                                <div id="revenueTrendChart" class="chart-container"></div>
+                            </div>
+                        </div>
+
+                        <div class="admin-card rounded-2xl p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Geographic Distribution</h3>
+                            <div id="geoChart" class="chart-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section -->
+                    <div id="settings-section" class="admin-section hidden">
+                        <div class="mb-8">
+                            <h2 class="text-3xl font-bold text-white mb-4">Platform Settings</h2>
+                            <p class="text-gray-200">Configure platform parameters and policies.</p>
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- Platform Settings -->
+                            <div class="admin-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Platform Configuration</h3>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Payment Amount (Ksh)</label>
+                                        <input type="number" value="20" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Platform Fee (%)</label>
+                                        <input type="number" value="75" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Auto-approve Posts</label>
+                                        <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green">
+                                            <option>Enabled</option>
+                                            <option>Disabled</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Post Expiry (days)</label>
+                                        <input type="number" value="30" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-safaricom-green">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Email Templates -->
+                            <div class="admin-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Email Templates</h3>
+                                <div class="space-y-4">
+                                    <button class="w-full text-left px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        Match Found Notification
+                                    </button>
+                                    <button class="w-full text-left px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        Payment Confirmation
+                                    </button>
+                                    <button class="w-full text-left px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        Welcome Email
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Security Settings -->
+                            <div class="admin-card rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Security Settings</h3>
+                                <div class="space-y-4">
+                                    <label class="flex items-center justify-between">
+                                        <span class="text-gray-700">Enable rate limiting</span>
+                                        <input type="checkbox" checked class="toggle-switch">
+                                    </label>
+                                    <label class="flex items-center justify-between">
+                                        <span class="text-gray-700">Require email verification</span>
+                                        <input type="checkbox" checked class="toggle-switch">
+                                    </label>
+                                    <label class="flex items-center justify-between">
+                                        <span class="text-gray-700">Enable reCAPTCHA</span>
+                                        <input type="checkbox" checked class="toggle-switch">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        // Admin Dashboard Logic
+        let currentSection = 'overview';
+        let allPosts = [];
+        let allUsers = [];
+        let allPayments = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAdminDashboard();
+        });
+
+        function initializeAdminDashboard() {
+            // Check if user is admin
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser || JSON.parse(currentUser).email !== 'moneymaker9767@gmail.com') {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadAdminData();
+            setupNavigation();
+            setupFilters();
+        }
+
+        function loadAdminData() {
+            // Generate comprehensive mock data for admin
+            allPosts = generateMockPosts();
+            allUsers = generateMockUsers();
+            allPayments = generateMockPayments();
+
+            loadPostsTable();
+            loadUsersTable();
+            loadPaymentsTable();
+            initializeCharts();
+        }
+
+        function generateMockPosts() {
+            return [
+                {
+                    id: 1,
+                    title: 'iPhone 14 Pro - Blue',
+                    type: 'lost',
+                    user: 'John Doe',
+                    date: '2024-10-24',
+                    status: 'pending',
+                    category: 'phones'
+                },
+                {
+                    id: 2,
+                    title: 'National ID Card - Sarah Wanjiku',
+                    type: 'found',
+                    user: 'Jane Smith',
+                    date: '2024-10-23',
+                    status: 'approved',
+                    category: 'ids'
+                },
+                {
+                    id: 3,
+                    title: 'Black Leather Wallet',
+                    type: 'found',
+                    user: 'Mike Johnson',
+                    date: '2024-10-22',
+                    status: 'flagged',
+                    category: 'wallets'
+                },
+                {
+                    id: 4,
+                    title: 'Student ID - University of Nairobi',
+                    type: 'lost',
+                    user: 'Alice Brown',
+                    date: '2024-10-21',
+                    status: 'rejected',
+                    category: 'ids'
+                }
+            ];
+        }
+
+        function generateMockUsers() {
+            return [
+                {
+                    id: 1,
+                    name: 'John Doe',
+                    email: 'john@example.com',
+                    phone: '+254712345678',
+                    posts: 3,
+                    joinDate: '2024-01-15',
+                    status: 'active'
+                },
+                {
+                    id: 2,
+                    name: 'Jane Smith',
+                    email: 'jane@example.com',
+                    phone: '+254723456789',
+                    posts: 5,
+                    joinDate: '2024-02-20',
+                    status: 'active'
+                },
+                {
+                    id: 3,
+                    name: 'Mike Johnson',
+                    email: 'mike@example.com',
+                    phone: '+254734567890',
+                    posts: 2,
+                    joinDate: '2024-03-10',
+                    status: 'suspended'
+                }
+            ];
+        }
+
+        function generateMockPayments() {
+            return [
+                {
+                    id: 'MPESA001',
+                    user: 'John Doe',
+                    amount: 20,
+                    type: 'unlock_contact',
+                    date: '2024-10-24',
+                    status: 'completed'
+                },
+                {
+                    id: 'MPESA002',
+                    user: 'Jane Smith',
+                    amount: 20,
+                    type: 'unlock_contact',
+                    date: '2024-10-23',
+                    status: 'completed'
+                },
+                {
+                    id: 'MPESA003',
+                    user: 'Mike Johnson',
+                    amount: 20,
+                    type: 'unlock_contact',
+                    date: '2024-10-22',
+                    status: 'pending'
+                }
+            ];
+        }
+
+        function loadPostsTable() {
+            const postsTable = document.getElementById('postsTable');
+            postsTable.innerHTML = allPosts.map(post => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-3 px-4">
+                        <input type="checkbox" class="post-checkbox" value="${post.id}">
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="font-medium text-gray-900">${post.title}</div>
+                        <div class="text-sm text-gray-500">${post.category}</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${post.type === 'found' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${post.type.toUpperCase()}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">${post.user}</td>
+                    <td class="py-3 px-4">${formatDate(post.date)}</td>
+                    <td class="py-3 px-4">
+                        <span class="status-badge status-${post.status}">${post.status.toUpperCase()}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="flex space-x-2">
+                            <button onclick="approvePost(${post.id})" class="action-btn bg-green-100 text-green-800">Approve</button>
+                            <button onclick="rejectPost(${post.id})" class="action-btn bg-red-100 text-red-800">Reject</button>
+                            <button onclick="viewPost(${post.id})" class="action-btn bg-blue-100 text-blue-800">View</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadUsersTable() {
+            const usersTable = document.getElementById('usersTable');
+            usersTable.innerHTML = allUsers.map(user => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-3 px-4">
+                        <div class="font-medium text-gray-900">${user.name}</div>
+                    </td>
+                    <td class="py-3 px-4">${user.email}</td>
+                    <td class="py-3 px-4">${user.phone}</td>
+                    <td class="py-3 px-4">${user.posts}</td>
+                    <td class="py-3 px-4">${formatDate(user.joinDate)}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${user.status.toUpperCase()}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="flex space-x-2">
+                            <button onclick="editUser(${user.id})" class="action-btn bg-blue-100 text-blue-800">Edit</button>
+                            <button onclick="${user.status === 'active' ? 'suspendUser' : 'activateUser'}(${user.id})" class="action-btn ${user.status === 'active' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                                ${user.status === 'active' ? 'Suspend' : 'Activate'}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadPaymentsTable() {
+            const paymentsTable = document.getElementById('paymentsTable');
+            paymentsTable.innerHTML = allPayments.map(payment => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-3 px-4 font-mono text-sm">${payment.id}</td>
+                    <td class="py-3 px-4">${payment.user}</td>
+                    <td class="py-3 px-4 font-semibold">Ksh. ${payment.amount}</td>
+                    <td class="py-3 px-4">${payment.type.replace('_', ' ').toUpperCase()}</td>
+                    <td class="py-3 px-4">${formatDate(payment.date)}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${payment.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${payment.status.toUpperCase()}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="flex space-x-2">
+                            <button onclick="viewPayment('${payment.id}')" class="action-btn bg-blue-100 text-blue-800">View</button>
+                            <button onclick="refundPayment('${payment.id}')" class="action-btn bg-red-100 text-red-800">Refund</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function initializeCharts() {
+            // Activity Chart
+            const activityChart = echarts.init(document.getElementById('activityChart'));
+            const activityOption = {
+                tooltip: { trigger: 'axis' },
+                xAxis: {
+                    type: 'category',
+                    data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct']
+                },
+                yAxis: { type: 'value' },
+                series: [{
+                    data: [120, 200, 150, 80, 70, 110, 130, 180, 160, 210],
+                    type: 'line',
+                    smooth: true,
+                    itemStyle: { color: '#00A651' },
+                    areaStyle: { color: 'rgba(0, 166, 81, 0.1)' }
+                }]
+            };
+            activityChart.setOption(activityOption);
+
+            // Revenue Chart
+            const revenueChart = echarts.init(document.getElementById('revenueChart'));
+            const revenueOption = {
+                tooltip: { trigger: 'item' },
+                series: [{
+                    type: 'pie',
+                    radius: '70%',
+                    data: [
+                        { value: 6420, name: 'Unlock Fees', itemStyle: { color: '#00A651' } },
+                        { value: 3210, name: 'Platform Share', itemStyle: { color: '#006B3C' } },
+                        { value: 3210, name: 'Finder Rewards', itemStyle: { color: '#FF6B35' } }
+                    ]
+                }]
+            };
+            revenueChart.setOption(revenueOption);
+
+            // User Growth Chart
+            const userGrowthChart = echarts.init(document.getElementById('userGrowthChart'));
+            const userGrowthOption = {
+                tooltip: { trigger: 'axis' },
+                xAxis: {
+                    type: 'category',
+                    data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct']
+                },
+                yAxis: { type: 'value' },
+                series: [{
+                    data: [50, 120, 200, 350, 480, 620, 780, 950, 1100, 1234],
+                    type: 'bar',
+                    itemStyle: { color: '#00A651' }
+                }]
+            };
+            userGrowthChart.setOption(userGrowthOption);
+
+            // Revenue Trend Chart
+            const revenueTrendChart = echarts.init(document.getElementById('revenueTrendChart'));
+            const revenueTrendOption = {
+                tooltip: { trigger: 'axis' },
+                xAxis: {
+                    type: 'category',
+                    data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct']
+                },
+                yAxis: { type: 'value' },
+                series: [{
+                    data: [1200, 1800, 2400, 2100, 2800, 3200, 3600, 4200, 4800, 6420],
+                    type: 'line',
+                    smooth: true,
+                    itemStyle: { color: '#FF6B35' },
+                    areaStyle: { color: 'rgba(255, 107, 53, 0.1)' }
+                }]
+            };
+            revenueTrendChart.setOption(revenueTrendOption);
+
+            // Geographic Chart
+            const geoChart = echarts.init(document.getElementById('geoChart'));
+            const geoOption = {
+                tooltip: { trigger: 'axis' },
+                xAxis: {
+                    type: 'category',
+                    data: ['Nairobi', 'Mombasa', 'Kisumu', 'Eldoret', 'Nakuru', 'Meru', 'Nyeri', 'Machakos']
+                },
+                yAxis: { type: 'value' },
+                series: [{
+                    data: [245, 89, 67, 78, 56, 34, 45, 33],
+                    type: 'bar',
+                    itemStyle: { color: '#1E3A8A' }
+                }]
+            };
+            geoChart.setOption(geoOption);
+        }
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('href').substring(1);
+                    switchSection(target);
+                });
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            });
+        }
+
+        function setupFilters() {
+            // Posts filter
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const filter = this.dataset.filter;
+                    filterPosts(filter);
+                });
+            });
+
+            // Select all checkbox
+            document.getElementById('selectAll').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.post-checkbox');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+        }
+
+        function switchSection(section) {
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[href="#${section}"]`).classList.add('active');
+
+            // Hide all sections
+            document.querySelectorAll('.admin-section').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+
+            // Show target section
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            currentSection = section;
+        }
+
+        function filterPosts(filter) {
+            const rows = document.querySelectorAll('#postsTable tr');
+            rows.forEach(row => {
+                const status = row.dataset.status || 'all';
+                if (filter === 'all' || status === filter) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Action functions
+        function approvePost(postId) {
+            LostFoundApp.showNotification(`Post ${postId} approved successfully!`, 'success');
+            // Update post status in data
+            const post = allPosts.find(p => p.id === postId);
+            if (post) post.status = 'approved';
+            loadPostsTable();
+        }
+
+        function rejectPost(postId) {
+            LostFoundApp.showNotification(`Post ${postId} rejected!`, 'error');
+            // Update post status in data
+            const post = allPosts.find(p => p.id === postId);
+            if (post) post.status = 'rejected';
+            loadPostsTable();
+        }
+
+        function viewPost(postId) {
+            LostFoundApp.showNotification(`Viewing post ${postId} details...`, 'info');
+        }
+
+        function bulkApprove() {
+            const selected = document.querySelectorAll('.post-checkbox:checked');
+            LostFoundApp.showNotification(`${selected.length} posts approved in bulk!`, 'success');
+        }
+
+        function bulkReject() {
+            const selected = document.querySelectorAll('.post-checkbox:checked');
+            LostFoundApp.showNotification(`${selected.length} posts rejected in bulk!`, 'error');
+        }
+
+        function editUser(userId) {
+            LostFoundApp.showNotification(`Editing user ${userId}...`, 'info');
+        }
+
+        function suspendUser(userId) {
+            LostFoundApp.showNotification(`User ${userId} suspended!`, 'error');
+        }
+
+        function activateUser(userId) {
+            LostFoundApp.showNotification(`User ${userId} activated!`, 'success');
+        }
+
+        function viewPayment(paymentId) {
+            LostFoundApp.showNotification(`Viewing payment ${paymentId}...`, 'info');
+        }
+
+        function refundPayment(paymentId) {
+            LostFoundApp.showNotification(`Payment ${paymentId} refunded!`, 'success');
+        }
+
+        function exportReport() {
+            LostFoundApp.showNotification('Exporting platform report...', 'info');
+        }
+
+        function addUser() {
+            LostFoundApp.showNotification('Add user dialog opened...', 'info');
+        }
+
+        function exportUsers() {
+            LostFoundApp.showNotification('Exporting users data...', 'info');
+        }
+
+        function reconcilePayments() {
+            LostFoundApp.showNotification('Reconciling payments...', 'info');
+        }
+
+        function exportPayments() {
+            LostFoundApp.showNotification('Exporting payment data...', 'info');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-KE', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    </script>
+</body>
+</html>
