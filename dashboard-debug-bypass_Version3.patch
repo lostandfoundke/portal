@@ -1,0 +1,54 @@
+*** Begin Patch
+*** Update File: dashboard.html
+@@
+-        initializeDashboard();
++        initializeDashboard();
+     });
+ 
+     function initializeDashboard() {
+-        // Check if user is logged in
+-        const currentUser = localStorage.getItem('currentUser');
+-        if (!currentUser) {
+-            window.location.href = 'index.html';
+-            return;
+-        }
+-
+-        const user = JSON.parse(currentUser);
+-        loadUserProfile(user);
+-        loadDashboardData();
+-        setupNavigation();
+-        setupFilters();
++        // Check if user is logged in
++        const currentUser = localStorage.getItem('currentUser');
++
++        if (!currentUser) {
++            // Development / debugging bypass:
++            // - Use ?debug=1 in the URL or set localStorage.debugDashboard = '1' to skip the redirect.
++            // - When bypassing, create a temporary dev user so the page can render.
++            const urlParams = new URLSearchParams(window.location.search);
++            const debugBypass = urlParams.get('debug') === '1' || localStorage.getItem('debugDashboard') === '1';
++
++            if (debugBypass) {
++                console.warn('No currentUser found. Entering dashboard debug mode (temporary user created).');
++                const testUser = {
++                    name: 'Debug User',
++                    email: 'debug@example.com',
++                    phone: '+254700000000',
++                    location: 'Nairobi',
++                    bio: ''
++                };
++                localStorage.setItem('currentUser', JSON.stringify(testUser));
++            } else {
++                // Production behaviour: redirect to landing/login if not authenticated
++                window.location.href = 'index.html';
++                return;
++            }
++        }
++
++        const user = JSON.parse(localStorage.getItem('currentUser'));
++        loadUserProfile(user);
++        loadDashboardData();
++        setupNavigation();
++        setupFilters();
+     }
+*** End Patch
